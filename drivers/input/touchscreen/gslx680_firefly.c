@@ -488,7 +488,7 @@ static void init_chip(struct i2c_client *client)
 	int rc;
 	int i;
 	gslX680_shutdown_low();
-	msleep(1000);
+	msleep(20);
 	gslX680_shutdown_high();
 	msleep(20);
 	for(i=0;i<10;i++){
@@ -501,6 +501,9 @@ static void init_chip(struct i2c_client *client)
 		printk("------gslX680 test_i2c error------\n");
 		return;
 	}
+	clr_reg(client);
+        reset_chip(client);
+        reset_chip(client);
 	clr_reg(client);
 	reset_chip(client);
 	gsl_load_fw(client);
@@ -1274,15 +1277,15 @@ static int  gsl_ts_probe(struct i2c_client *client,
 {
 	struct gsl_ts *ts;
 	int rc;
-	int timer = 3;
-	int ret = 0;
-	char buffer = 0;
+	//int timer = 3;
+	//int ret = 0;
+	//char buffer = 0;
 	struct device_node *np = client->dev.of_node;
 	enum of_gpio_flags wake_flags;
 	unsigned long irq_flags;
 
 	printk("GSLX680 Enter %s\n", __func__);
-
+/*
     while(timer > 0)
     {
         ret = i2c_master_recv(client,&buffer,1);
@@ -1298,8 +1301,8 @@ static int  gsl_ts_probe(struct i2c_client *client,
     if(ret < 0)
     {
         printk("%s--%d, i2c_master_recv fail\n", __func__, __LINE__);
-        return ret;
-    }
+        //return ret;
+    }*/
 
 	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
 		dev_err(&client->dev, "I2C functionality not supported\n");

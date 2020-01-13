@@ -243,14 +243,16 @@
 
 &i2c4 {
 	status = "okay";
-
+	clock-frequency = <100000>;
 	gslx680: gslx680@41 {
+		status = "okay";
 		compatible = "gslX680";
 		reg = <0x41>;
 		screen_max_x = <800>;
 		screen_max_y = <1280>;
 		touch-gpio = <&gpio4 28 IRQ_TYPE_LEVEL_LOW>;
 		reset-gpio = <&gpio4 21 GPIO_ACTIVE_HIGH>;
+		pinctrl-0 = <&gsl3680_pin>;
 		gsl,fw = <1>;
 		flip-x = <1>;
 		flip-y = <0>;
@@ -338,7 +340,13 @@
 					<2 5 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
-
+	 
+	tp {
+               gsl3680_pin: gsl3680_pin  {
+                       rockchip,pins = <4 28 RK_FUNC_GPIO &pcfg_pull_none>,
+                                       <4 21 RK_FUNC_GPIO &pcfg_pull_up>;
+               };
+       };
 	pcie {
 		pcie_3g_drv: pcie-3g-drv {
 			rockchip,pins =
