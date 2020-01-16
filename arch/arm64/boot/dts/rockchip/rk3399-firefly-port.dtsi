@@ -252,15 +252,15 @@
 &i2c4 {
 	status = "okay";
 
-	gslx680: gslx680@41 {
-		status = "disabled";
-		compatible = "gslX680";
-		reg = <0x41>;
-		screen_max_x = <1536>;
-		screen_max_y = <2048>;
-		touch-gpio = <&gpio4 28 IRQ_TYPE_LEVEL_LOW>;
-		reset-gpio = <&gpio0 12 GPIO_ACTIVE_HIGH>;
-	};
+//	gslx680: gslx680@41 {
+//		status = "disabled";
+//		compatible = "gslX680";
+//		reg = <0x41>;
+//		screen_max_x = <1536>;
+//		screen_max_y = <2048>;
+//		touch-gpio = <&gpio4 28 IRQ_TYPE_LEVEL_LOW>;
+//		reset-gpio = <&gpio0 12 GPIO_ACTIVE_HIGH>;
+//	};
 
 	mpu6500: mpu@68 {
 		status = "disabled";

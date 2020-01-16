@@ -2471,8 +2471,8 @@
 		i2c4 {
 			i2c4_xfer: i2c4-xfer {
 				rockchip,pins =
-					<1 12 RK_FUNC_1 &pcfg_pull_none>,
-					<1 11 RK_FUNC_1 &pcfg_pull_none>;
+					<1 12 RK_FUNC_1 &pcfg_pull_up>,
+					<1 11 RK_FUNC_1 &pcfg_pull_up>;
 			};
 		};
 

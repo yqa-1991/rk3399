@@ -57,7 +57,7 @@ int global_fw=0;
 #define GSL_STATUS_REG		0xe0
 #define GSL_PAGE_REG		0xf0
 
-
+static struct work_struct firefly_tp_work;
 
 #define TPD_PROC_DEBUG
 #ifdef TPD_PROC_DEBUG
@@ -192,7 +192,7 @@ static u16 y_new = 0;
 
 static int gslX680_init(void)
 {
-
+ printk("#######func=%s###line=%d\n###",__func__,__LINE__);
 	gpio_direction_output(g_wake_pin, 0);
 	gpio_set_value(g_wake_pin,1);
 
@@ -209,21 +209,24 @@ static int gslX680_init(void)
 
 static int gslX680_shutdown_low(void)
 {
+ printk("#######func=%s###line=%d\n###",__func__,__LINE__);
 if(g_wake_pin !=0)
 	{
-	gpio_direction_output(g_wake_pin, 0);
-	gpio_set_value(g_wake_pin,0);
+	//gpio_direction_output(g_wake_pin, 0);
+	//gpio_set_value(g_wake_pin,0);
 }
 	return 0;
 }
 
 static int gslX680_shutdown_high(void)
 {
-	if(g_wake_pin !=0)
+ printk("#######func=%s###line=%d\n###",__func__,__LINE__);
+/*	if(g_wake_pin !=0)
 	{
 		gpio_direction_output(g_wake_pin, 0);
 		gpio_set_value(g_wake_pin,1);
 	}
+*/
 	return 0;
 }
 
@@ -323,6 +326,7 @@ static void judge_chip_type(struct i2c_client *client)
 {
         u8 read_buf[4]  = {0, 0, 0, 0};
 
+ printk("#######func=%s###line=%d\n###",__func__,__LINE__);
         printk("orz chip_type=%x\n", chip_type);
         msleep(50);
         gsl_ts_read(client,0xfc, read_buf, sizeof(read_buf));
@@ -362,6 +366,7 @@ static void gsl_load_fw(struct i2c_client *client)
 	u32 source_len;
 	const struct fw_data *ptr_fw;
 
+ printk("###########################______func________________=%s____________###line=%d\n###",__func__,__LINE__);
 	printk("=============gsl_load_fw start==============\n");
 	if (global_fw){
 		if(0x36 == chip_type)
@@ -399,7 +404,7 @@ static void gsl_load_fw(struct i2c_client *client)
 					//i2c_smbus_write_i2c_block_data(client, buf[0], cur - buf - 1, buf);
 					cur = buf + 1;
 			}
-
+			
 			send_flag++;
 		}
 	}
@@ -415,12 +420,14 @@ static int test_i2c(struct i2c_client *client)
 	u8 write_buf = 0x12;
 	int ret, rc = 1;
 
+ printk("#######func=%s###line=%d\n###",__func__,__LINE__);
 	ret = gsl_ts_read( client, 0xf0, &read_buf, sizeof(read_buf) );
 	if  (ret  < 0)
 		rc --;
 	else
 		printk("I read reg 0xf0 is %x\n", read_buf);
 
+ printk("#######func=%s###line=%d\n###",__func__,__LINE__);
 	msleep(2);
 	ret = gsl_ts_write(client, 0xf0, &write_buf, sizeof(write_buf));
 	if(ret  >=  0 )
@@ -433,6 +440,7 @@ static int test_i2c(struct i2c_client *client)
 	else
 		printk("I read reg 0xf0 is 0x%x\n", read_buf);
 
+ printk("#######func=%s###line=%d\n###",__func__,__LINE__);
 	return rc;
 }
 
@@ -441,12 +449,14 @@ static void startup_chip(struct i2c_client *client)
 {
 	u8 tmp = 0x00;
 
+ printk("#######func=%s###line=%d\n###",__func__,__LINE__);
 #ifdef GSL_NOID_VERSION
 	if (global_fw)
 		gsl_DataInit(gsl_config_data_id_3680B);
 	else
 		gsl_DataInit(gsl_config_data_id);
 #endif
+ printk("#######func=%s###line=%d\n###",__func__,__LINE__);
 	gsl_ts_write(client, 0xe0, &tmp, 1);
 	msleep(10);
 }
@@ -456,6 +466,7 @@ static void reset_chip(struct i2c_client *client)
 	u8 tmp = 0x88;
 	u8 buf[4] = {0x00};
 
+ printk("#######func=%s###line=%d\n###",__func__,__LINE__);
 	gsl_ts_write(client, 0xe0, &tmp, sizeof(tmp));
 	msleep(20);
 	tmp = 0x04;
@@ -469,6 +480,7 @@ static void clr_reg(struct i2c_client *client)
 {
 	u8 write_buf[4]	= {0};
 
+ printk("#######func=%s###line=%d\n###",__func__,__LINE__);
 	write_buf[0] = 0x88;
 	gsl_ts_write(client, 0xe0, &write_buf[0], 1);
 	msleep(20);
@@ -487,6 +499,7 @@ static void init_chip(struct i2c_client *client)
 {
 	int rc;
 	int i;
+ printk("#######func=%s###line=%d\n###",__func__,__LINE__);
 	gslX680_shutdown_low();
 	msleep(20);
 	gslX680_shutdown_high();
@@ -501,21 +514,45 @@ static void init_chip(struct i2c_client *client)
 		printk("------gslX680 test_i2c error------\n");
 		return;
 	}
-	clr_reg(client);
-        reset_chip(client);
+	//clr_reg(client);
+        //reset_chip(client);
         reset_chip(client);
 	clr_reg(client);
 	reset_chip(client);
+	msleep(5);
 	gsl_load_fw(client);
 	startup_chip(client);
 	reset_chip(client);
 	startup_chip(client);
 }
+/*
+static void work_handler(struct work_struct *data)
+{
+	int rc;
+
+	gslX680_shutdown_low();
+	msleep(20);
+	gslX680_shutdown_high();
+	msleep(20);
+	rc = test_i2c(gts->client);
+	if (rc < 0) {
+		print_info("------gslX680 test_i2c error------\n");
+		return;
+	}
+	clr_reg(gts->client);
+	reset_chip(gts->client);
+	gsl_load_fw(gts->client);
+	startup_chip(gts->client);
+	reset_chip(gts->client);
+	startup_chip(gts->client);
+}
+*/
 
 static void check_mem_data(struct i2c_client *client)
 {
 	u8 read_buf[4]  = {0};
 
+ printk("#######func=%s###line=%d\n###",__func__,__LINE__);
 	msleep(30);
 	gsl_ts_read(client,0xb0, read_buf, sizeof(read_buf));
 
@@ -1327,7 +1364,7 @@ static int  gsl_ts_probe(struct i2c_client *client,
 	//ts->irq_pin=of_get_named_gpio_flags(np, "irp-gpio", 0, (enum of_gpio_flags *)&irq_flags);
 	//ts->wake_pin=of_get_named_gpio_flags(np, "wake-gpio", 0, &wake_flags);
 	ts->irq_pin=of_get_named_gpio_flags(np, "touch-gpio", 0, (enum of_gpio_flags *)&irq_flags);
-	ts->wake_pin=of_get_named_gpio_flags(np, "reset-gpio", 0, &wake_flags);
+	/*ts->wake_pin=of_get_named_gpio_flags(np, "reset-gpio", 0, &wake_flags);
 
 	if (gpio_is_valid(ts->wake_pin)) {
 		rc = devm_gpio_request_one(&client->dev, ts->wake_pin, (wake_flags & OF_GPIO_ACTIVE_LOW) ? GPIOF_OUT_INIT_LOW : GPIOF_OUT_INIT_HIGH, "gslX680 wake pin");
@@ -1338,7 +1375,7 @@ static int  gsl_ts_probe(struct i2c_client *client,
 		g_wake_pin = ts->wake_pin;
 	} else {
 		dev_info(&client->dev, "wake pin invalid\n");
-	}
+	}*/
 	if (gpio_is_valid(ts->irq_pin)) {
 		rc = devm_gpio_request_one(&client->dev, ts->irq_pin, (irq_flags & OF_GPIO_ACTIVE_LOW) ? GPIOF_OUT_INIT_LOW : GPIOF_OUT_INIT_HIGH, "gslX680 irq pin");
 		if (rc != 0) {
@@ -1371,7 +1408,7 @@ static int  gsl_ts_probe(struct i2c_client *client,
 
 	gslX680_init();
 //	gpio_set_value(ts->irq_pin,1);
-//	msleep(20);
+	msleep(200);
 
 #ifdef GSLX680_COMPATIBLE
         judge_chip_type(ts->client);
@@ -1437,6 +1474,8 @@ static int  gsl_ts_probe(struct i2c_client *client,
 
 	gpio_set_value(ts->irq_pin, 0);
 	enable_irq(ts->irq);
+//	INIT_WORK(&firefly_tp_work, work_handler);	
+//	schedule_work(&firefly_tp_work);
 	printk("[GSLX680] End %s\n", __func__);
 
 	return 0;
@@ -1507,6 +1546,7 @@ static struct i2c_driver gsl_ts_driver = {
 static int __init gsl_ts_init(void)
 {
     int ret;
+	msleep(1000);
 	printk("==gsl_ts_init==\n");
 	ret = i2c_add_driver(&gsl_ts_driver);
 	printk("ret=%d\n",ret);
@@ -1519,7 +1559,8 @@ static void __exit gsl_ts_exit(void)
 	return;
 }
 
-module_init(gsl_ts_init);
+//module_init(gsl_ts_init);
+late_initcall(gsl_ts_init);
 module_exit(gsl_ts_exit);
 
 MODULE_LICENSE("GPL");
