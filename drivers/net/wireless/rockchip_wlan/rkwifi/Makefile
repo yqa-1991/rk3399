@@ -2,8 +2,8 @@
 #rkwifi packed Makefile
 # (gwl)
 
-obj-$(CONFIG_AP6XXX) += bcmdhd/
-
+#obj-$(CONFIG_AP6XXX) += bcmdhd/
+obj-$(CONFIG_BCMDHD) += bcmdhd/
 .PHONY: clean
 
 clean:
